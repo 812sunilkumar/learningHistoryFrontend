@@ -1,0 +1,38 @@
+/* src/styles.css */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal h2 {
+    margin-top: 0;
+  }
+  
+  .modal form {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+  }
+  
+  .modal label {
+    display: block;
+    margin: 10px 0;
+  }
+  
+  .modal input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  .modal button {
+    margin-top: 10px;
+  }
+  
