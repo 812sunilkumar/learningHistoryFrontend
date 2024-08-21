@@ -9,49 +9,42 @@ const LearningHistoryModal = ({ employee, onClose }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
 
-  // Handler for Edit button click
   const handleEditClick = (course) => {
-    setEditCourse({ ...course }); // Create a copy of the course to edit
+    setEditCourse({ ...course });
   };
 
-  // Handler to update the course
   const handleUpdateCourse = async (courseId, updatedCourse) => {
     try {
       await updateCourse(employee.delegate_id, courseId, updatedCourse);
-      onClose(); // Refresh or close modal
+      onClose();
     } catch (error) {
       console.error('Error updating course', error);
     }
   };
 
-  // Handler to open Add Course Modal
   const handleAddCourse = () => {
     setAddCourseModalOpen(true);
   };
 
-  // Handler to close Add Course Modal
   const handleCloseAddCourseModal = () => {
     setAddCourseModalOpen(false);
   };
 
-  // Handler to open Delete Confirmation Dialog
   const handleOpenDeleteDialog = (course) => {
     setCourseToDelete(course);
     setDeleteDialogOpen(true);
   };
 
-  // Handler to close Delete Confirmation Dialog
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setCourseToDelete(null);
   };
 
-  // Handler to delete the course
   const handleDeleteCourse = async () => {
     try {
       if (courseToDelete) {
         await deleteCourse(employee.delegate_id, courseToDelete.course_code);
-        onClose(); // Refresh or close modal
+        onClose();
       }
     } catch (error) {
       console.error('Error deleting course', error);
@@ -60,7 +53,6 @@ const LearningHistoryModal = ({ employee, onClose }) => {
     }
   };
 
-  // Handler to update course details in state
   const handleCourseChange = (e) => {
     setEditCourse({
       ...editCourse,
@@ -68,7 +60,6 @@ const LearningHistoryModal = ({ employee, onClose }) => {
     });
   };
 
-  // Handler to save the updated course
   const handleSaveCourse = () => {
     if (editCourse && editCourse.course_code) {
       handleUpdateCourse(editCourse.course_code, editCourse);
@@ -80,28 +71,30 @@ const LearningHistoryModal = ({ employee, onClose }) => {
 
   return (
     <Modal open={!!employee} onClose={onClose}>
-      <Box 
-        sx={{ 
-          width: 600, 
-          p: 4, 
-          mx: 'auto', 
-          mt: 5, 
+      <Box
+        sx={{
+          width: '90%',
+          maxWidth: 900,
+          p: 4,
+          mx: 'auto',
+          mt: 5,
           bgcolor: 'background.paper',
-          maxHeight: '80vh', // Set a max height for the modal
-          overflowY: 'auto'   // Allow vertical scrolling
+          maxHeight: '80vh',
+          overflowY: 'auto'
         }}
       >
-        <Typography variant="h6" gutterBottom>
-          Learning History for {employee?.first_name} {employee?.last_name}
+        <Typography variant="h5" gutterBottom>
+          Learning History for {employee?.delegate_id} {employee?.learning_history?.last_name}
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary"
-          onClick={handleAddCourse}
-          sx={{ mb: 2 }}
-        >
-          Add Course
-        </Button>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddCourse}
+          >
+            Add Course
+          </Button>
+        </Box>
         <TableContainer>
           <Table>
             <TableHead>
@@ -114,7 +107,7 @@ const LearningHistoryModal = ({ employee, onClose }) => {
                 <TableCell>Valid From</TableCell>
                 <TableCell>Valid Until</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
+                <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -128,19 +121,19 @@ const LearningHistoryModal = ({ employee, onClose }) => {
                   <TableCell>{course.valid_from}</TableCell>
                   <TableCell>{course.valid_until}</TableCell>
                   <TableCell>{course.status}</TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="outlined" 
-                      color="primary" 
+                  <TableCell align="right">
+                    <Button
+                      variant="contained"
+                      color="primary"
                       onClick={() => handleEditClick(course)}
+                      sx={{ mr: 1 }}
                     >
                       Edit
                     </Button>
-                    <Button 
-                      variant="outlined" 
+                    <Button
+                      variant="contained"
                       color="error"
                       onClick={() => handleOpenDeleteDialog(course)}
-                      sx={{ ml: 1 }}
                     >
                       Delete
                     </Button>
@@ -225,14 +218,15 @@ const LearningHistoryModal = ({ employee, onClose }) => {
               fullWidth
               margin="normal"
             />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSaveCourse}
-              sx={{ mt: 2 }}
-            >
-              Save Changes
-            </Button>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSaveCourse}
+              >
+                Save Changes
+              </Button>
+            </Box>
           </Box>
         )}
 
@@ -263,7 +257,7 @@ const LearningHistoryModal = ({ employee, onClose }) => {
             open={isAddCourseModalOpen}
             onClose={handleCloseAddCourseModal}
             delegateId={employee?.delegate_id}
-            fetchLearningHistory={onClose} // Refresh the learning history
+            fetchLearningHistory={onClose}
           />
         )}
       </Box>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Box, Typography, TextField, Dialog, DialogActions, DialogContent, DialogTitle, TablePagination } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, Pagination } from '@mui/material';
 import LearningHistoryModal from './LearningHistoryModal';
 import AddEmployeeModal from './AddEmployeeModal';
 import { fetchEmployees, updateEmployee, deleteEmployee } from '../services/apiService';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
 
 const EmployeeTable = () => {
   const [employees, setEmployees] = useState([]);
@@ -14,8 +16,8 @@ const EmployeeTable = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const fetchEmployeeData = async () => {
     try {
@@ -35,8 +37,8 @@ const EmployeeTable = () => {
     // Filter employees based on search query
     setFilteredEmployees(
       employees.filter(employee =>
-        `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employee.delegate_id.toLowerCase().includes(searchQuery.toLowerCase())
+        employee.delegate_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        `${employee?.learning_history?.first_name} ${employee?.learning_history?.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
   }, [searchQuery, employees]);
@@ -85,9 +87,10 @@ const EmployeeTable = () => {
     setIsLearningHistoryModalOpen(true);
   };
 
-  const handleCloseLearningHistoryModal = () => {
+  const handleCloseLearningHistoryModal = async () => {
     setIsLearningHistoryModalOpen(false);
     setSelectedEmployee(null);
+    await fetchEmployeeData(); // Refresh employee data after closing modal
   };
 
   const handleOpenAddEmployeeModal = () => {
@@ -111,55 +114,57 @@ const EmployeeTable = () => {
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setPage(0); // Reset to first page on search
+    setPage(1); // Reset to first page when search query changes
   };
 
-  const handleChangePage = (event, newPage) => {
+  const handlePageChange = (event, newPage) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  const startIndex = (page - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedEmployees = filteredEmployees.slice(startIndex, endIndex);
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Employee List
-      </Typography>
-      <Button variant="contained" color="primary" onClick={handleOpenAddEmployeeModal}>
-        Add Employee
-      </Button>
-      <TextField
-        label="Search"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        value={searchQuery}
-        onChange={handleSearchChange}
-      />
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Employee ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Delegate ID</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredEmployees
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((employee) => (
+    <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Box sx={{ width: '100%', maxWidth: 1200, mb: 4 }}>
+        <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', mb: 2 }}>
+          User List
+        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ mr: 1 }} />
+            }}
+            sx={{ width: 300, mr: 2 }}
+          />
+          <Button variant="contained" color="primary" onClick={handleOpenAddEmployeeModal} startIcon={<AddIcon />}>
+            Add Employee
+          </Button>
+        </Box>
+        <TableContainer component={Paper} sx={{ maxHeight: 500, overflow: 'auto' }}>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell>Employee ID</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Delegate ID</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedEmployees.map((employee) => (
                 <TableRow key={employee.employee_id}>
                   <TableCell>{employee.employee_id}</TableCell>
                   <TableCell>
                     {editingEmployee?.employee_id === employee.employee_id ? (
                       <Box>
                         <TextField
-                        defaultValue={employee?.learning_history?.first_name || ''}
+                          defaultValue={employee?.learning_history?.first_name || ''}
                           value={editingEmployee.first_name}
                           onChange={(e) => handleEditNameChange(e, 'first_name')}
                           label="First Name"
@@ -167,29 +172,30 @@ const EmployeeTable = () => {
                           fullWidth
                         />
                         <TextField
-                        defaultValue={employee?.learning_history?.last_name || ''}
+                          defaultValue={employee?.learning_history?.last_name || ''}
                           value={editingEmployee.last_name}
                           onChange={(e) => handleEditNameChange(e, 'last_name')}
                           label="Last Name"
                           margin="normal"
                           fullWidth
                         />
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={handleSaveNameChange}
-                          sx={{ mt: 1, mr: 1 }}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          onClick={handleCancelEdit}
-                          sx={{ mt: 1 }}
-                        >
-                          Cancel
-                        </Button>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleSaveNameChange}
+                            sx={{ mr: 1 }}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={handleCancelEdit}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
                       </Box>
                     ) : (
                       <span>{employee?.learning_history?.first_name} {employee?.learning_history?.last_name}</span>
@@ -198,43 +204,43 @@ const EmployeeTable = () => {
                   <TableCell>{employee.delegate_id}</TableCell>
                   <TableCell>
                     <Button
-                      variant="outlined"
+                      variant="contained"
                       color="primary"
                       onClick={() => handleViewLearningHistory(employee)}
+                      sx={{ mr: 1 }}
                     >
                       View Learning History
                     </Button>
                     <Button
-                      variant="outlined"
+                      variant="contained"
                       color="secondary"
                       onClick={() => setEditingEmployee(employee)}
-                      sx={{ ml: 1 }}
+                      sx={{ mr: 1 }}
                     >
                       Edit Name
                     </Button>
                     <Button
-                      variant="outlined"
+                      variant="contained"
                       color="error"
                       onClick={() => handleOpenDeleteDialog(employee)}
-                      sx={{ ml: 1 }}
                     >
                       Delete
                     </Button>
                   </TableCell>
                 </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={filteredEmployees.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Pagination
+            count={Math.ceil(filteredEmployees.length / rowsPerPage)}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </Box>
+      </Box>
       {selectedEmployee && (
         <LearningHistoryModal
           open={isLearningHistoryModalOpen}
@@ -260,8 +266,8 @@ const EmployeeTable = () => {
           <Button onClick={handleCloseDeleteDialog} color="primary">
             Cancel
           </Button>
-          <Button 
-            onClick={handleDeleteEmployee} 
+          <Button
+            onClick={handleDeleteEmployee}
             color="error"
           >
             Delete

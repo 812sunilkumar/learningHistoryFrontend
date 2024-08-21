@@ -33,4 +33,8 @@ export const deleteEmployee = async (delegateId) => {
     return axios.delete(`${API_BASE_URL}/learningHistory/${courseCode}/${delegateId}`);
   };
 
-  
+//   get course codes: 
+export const fetchCourseCodes = async () => {
+    const response = await axios.get(`${API_BASE_URL}/learningHistory/getCourseCode`);
+    return response.data;
+  };

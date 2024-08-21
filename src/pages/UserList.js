@@ -5,9 +5,9 @@ import { Box, Typography } from '@mui/material';
 const UserList = () => {
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
+      {/* <Typography variant="h4" gutterBottom>
         User List
-      </Typography>
+      </Typography> */}
       <EmployeeTable />
     </Box>
   );

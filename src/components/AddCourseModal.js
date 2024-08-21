@@ -1,7 +1,6 @@
-// src/components/AddCourseModal.js
-import React, { useState } from 'react';
-import { Modal, Box, TextField, Button, Typography } from '@mui/material';
-import { addCourse } from '../services/apiService';
+import React, { useState, useEffect } from 'react';
+import { Modal, Box, TextField, Button, Typography, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import { addCourse, fetchCourseCodes } from '../services/apiService';
 
 const AddCourseModal = ({ open, onClose, delegateId, fetchLearningHistory }) => {
   const [course, setCourse] = useState({
@@ -14,6 +13,20 @@ const AddCourseModal = ({ open, onClose, delegateId, fetchLearningHistory }) => 
     valid_until: '',
     status: ''
   });
+  const [courseCodes, setCourseCodes] = useState([]);
+
+  useEffect(() => {
+    const loadCourseCodes = async () => {
+      try {
+        const codes = await fetchCourseCodes();
+        setCourseCodes(codes);
+      } catch (error) {
+        console.error('Error fetching course codes', error);
+      }
+    };
+
+    loadCourseCodes();
+  }, []);
 
   const handleChange = (e) => {
     setCourse({
@@ -46,14 +59,20 @@ const AddCourseModal = ({ open, onClose, delegateId, fetchLearningHistory }) => 
           fullWidth
           margin="normal"
         />
-        <TextField
-          label="Course Code"
-          name="course_code"
-          value={course.course_code}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Course Code</InputLabel>
+          <Select
+            name="course_code"
+            value={course.course_code}
+            onChange={handleChange}
+          >
+            {courseCodes.map((code) => (
+              <MenuItem key={code} value={code}>
+                {code}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <TextField
           label="Country"
           name="country"
