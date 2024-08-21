@@ -34,18 +34,33 @@ const ChartComponent = ({ employees }) => {
   const [inactiveRecords, setInactiveRecords] = useState(0);
 
   const countries = useMemo(() => {
-    const countrySet = new Set(employees.flatMap(emp => emp.learning_history?.records.map(record => record.country) || []));
+    const countrySet = new Set(employees.flatMap(emp => {
+      // Ensure records is treated as an array
+      const records = Array.isArray(emp.learning_history?.records) 
+        ? emp.learning_history.records 
+        : [];
+      return records.map(record => record.country);
+    }));
     return Array.from(countrySet);
   }, [employees]);
 
   const trainingProviders = useMemo(() => {
-    const providerSet = new Set(employees.flatMap(emp => emp.learning_history?.records.map(record => record.training_provider) || []));
+    const providerSet = new Set(employees.flatMap(emp => {
+      // Ensure records is treated as an array
+      const records = Array.isArray(emp.learning_history?.records) 
+        ? emp.learning_history.records 
+        : [];
+      return records.map(record => record.training_provider);
+    }));
     return Array.from(providerSet);
   }, [employees]);
 
   const applyFilters = () => {
+    // Ensure records is treated as an array
     let data = employees.flatMap((employee) =>
-      employee.learning_history?.records ?? []
+      Array.isArray(employee.learning_history?.records) 
+        ? employee.learning_history.records 
+        : []
     );
 
     if (countryFilter) {

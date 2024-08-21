@@ -69,6 +69,9 @@ const LearningHistoryModal = ({ employee, onClose }) => {
     }
   };
 
+  // Ensure records is treated as an array
+  const records = Array.isArray(employee?.learning_history?.records) ? employee.learning_history.records : [];
+
   return (
     <Modal open={!!employee} onClose={onClose}>
       <Box
@@ -111,7 +114,7 @@ const LearningHistoryModal = ({ employee, onClose }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {employee?.learning_history?.records.map((course) => (
+              {records.map((course) => (
                 <TableRow key={course.course_code}>
                   <TableCell>{course.course_title}</TableCell>
                   <TableCell>{course.course_code}</TableCell>
