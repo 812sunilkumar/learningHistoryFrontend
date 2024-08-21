@@ -1,6 +1,5 @@
-// src/components/AddEmployeeModal.js
 import React, { useState } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { addEmployee } from '../services/apiService';
 
 // Helper function to generate a random employee ID
@@ -24,7 +23,8 @@ const AddEmployeeModal = ({ onAddEmployee }) => {
     employee_id: generateEmployeeId(),
     delegate_id: generateDelegateId(),
     first_name: '',
-    last_name: ''
+    last_name: '',
+    active: true, // Added this line
   });
 
   const handleChange = (e) => {
@@ -41,7 +41,8 @@ const AddEmployeeModal = ({ onAddEmployee }) => {
         employee_id: generateEmployeeId(),
         delegate_id: generateDelegateId(),
         first_name: '',
-        last_name: ''
+        last_name: '',
+        active: true, // Added this line
       });
     } catch (error) {
       console.error('Error adding employee', error);
@@ -93,6 +94,19 @@ const AddEmployeeModal = ({ onAddEmployee }) => {
             value={newEmployee.last_name}
             onChange={handleChange}
           />
+          <FormControl margin="normal" fullWidth>
+            <InputLabel id="active-label">Active</InputLabel>
+            <Select
+              labelId="active-label"
+              id="active-select"
+              name="active"
+              value={newEmployee.active ? 'true' : 'false'}
+              onChange={(e) => setNewEmployee({ ...newEmployee, active: e.target.value === 'true' })}
+            >
+              <MenuItem value="true">Active</MenuItem>
+              <MenuItem value="false">Inactive</MenuItem>
+            </Select>
+          </FormControl>
         </form>
       </DialogContent>
       <DialogActions>
